@@ -1,5 +1,5 @@
 site_name: Documentación YOOX
 theme:
-  name: mkdocs
+  name: readthedocs
   locale: en
   include_sidebar: true
