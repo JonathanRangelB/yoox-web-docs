@@ -27,6 +27,12 @@ jobs:
         run: |
           pip install mkdocs
 
+      - name: 🚀 Configurar git con el token
+        run: |
+          git config --global user.email "github-actions@github.com"
+          git config --global user.name "github-actions[bot]"
+          git remote set-url origin https://x-access-token:${{ secrets.mkdocs-yoox-docs }}@github.com/JonathanRangelB/yoox-web-docs.git
+
       - name: 🚀 Construir y desplegar con MkDocs
         run: |
           mkdocs gh-deploy --force
