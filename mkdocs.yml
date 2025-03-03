@@ -1,0 +1,5 @@
+site_name: Documentación YOOX
+theme:
+  name: mkdocs
+  locale: en
+  include_sidebar: true
