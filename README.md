@@ -13,7 +13,13 @@ Proyecto para tener un manual de usuario para los colaboradores de YOOX
 pip install mkdocs
 ```
 
-## deploy a gh-pages
+### Ejecución local
+
+```bash
+mkdocs serve
+```
+
+### deploy a gh-pages
 
 ```bash
 mkdocs gh-deploy
