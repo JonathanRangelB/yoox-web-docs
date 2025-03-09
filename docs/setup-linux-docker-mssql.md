@@ -42,7 +42,13 @@ sudo docker run hello-world
 curl -fsSL https://bun.sh/install | bash
 ```
 
-3. (Opcional) Instalar [Neovim](https://github.com/neovim/neovim/blob/master/INSTALL.md#linux) un editor de texto bastante completo dentro de la terminal
+3. Instalar (si es que aun no las tienenes) las utilerias que necesitaremos mas adelante en esta guia:
+
+```bash
+apt install zip xclip -y
+```
+
+4. (Opcional) Instalar [Neovim](https://github.com/neovim/neovim/blob/master/INSTALL.md#linux) un editor de texto bastante completo dentro de la terminal
 
 ```bash
 curl -LO https://github.com/neovim/neovim/releases/latest/download/nvim-linux-x86_64.tar.gz
@@ -81,10 +87,10 @@ services:
   mssql:
     image: mcr.microsoft.com/mssql/server:2022-latest
     user: root
-    container_name: yoox_test
+    container_name: My_custom_container
     environment:
       - ACCEPT_EULA=Y
-      - MSSQL_SA_PASSWORD=Marzo2025?
+      - MSSQL_SA_PASSWORD=PASSWORD
       - MSSQL_PID=Express
     ports:
       - "1433:1433"
@@ -93,3 +99,56 @@ services:
     restart: unless-stopped
 
 ```
+
+El nombre del contenedor deberia de incluir el nombre del stage al cual pertenecera, algo como por ejemplo: `aplicacion_production`, `aplicacion_development` ó `aplicacion_staging`
+
+## Backup DB bash script
+
+Ahora necesitamos crear un archivo en nuestra ruta $HOME (preferentemente) con cualquier nombre, en este caso lo llamare `backup_db.sh` y le agregamos el siguiente contenido:
+
+```bash
+#!/bin/bash
+FECHA=$(date +%Y%m%d_%H%M%S)
+docker exec -it yoox_test /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P 'PASSWORD' -C -Q "BACKUP DATABASE NOMBRE_BD TO DISK = '/var/opt/mssql/data/respaldo_$FECHA.bak' WITH FORMAT"
+echo "Respaldo guardado en /db_backups/respaldo_$FECHA.bak"
+zip db_backups/respaldo_$FECHA.zip db_backups/respaldo_$FECHA.bak
+rm db_backups/respaldo_$FECHA.bak
+```
+
+Cambiar solo en la sección del comando de docker el valor de `-P` por el password de tu db y el valor de `-Q` para que tenga el nombre de tu base de datos.
+
+El script anterior guarda el archivo .bak en la ruta `/var/opt/mssql/data/` la cual teniamos previamente mapeada como `volumen` a la ruta de nuestro host llamado `~/db_backups`, comprimira el archivo .bak en un archivo standard .zip para posteriormente eliminar el archivo .bak y asi ahorrar espacio en la VPS
+
+## Crontab para ejecutar periodicamente script
+
+Antes que nada es buena idea validar que el crontab este habilitado en nuestro ubuntu linux con el siguiente comando:
+
+```bash
+sudo systemctl enable cron
+sudo systemctl start cron
+```
+
+### Abbrir crontab
+
+Aquí es donde agregamos nuestros comandos que queremos ejecutar cada cierto tiempo, y lo ejecutamos con el comando:
+
+```bash
+crontab -e
+```
+
+Al abrirlo por primera vez nos preguntara por algun editor de texto, elegir el que mas sepas usar, si no sabes cual elegir te recomiendo usar `nano`
+
+Veras un texto explicando el crontab, solo necesitamos agregar una linea al final del todo, dejemos todo el texto sin modificaciones, nos ayuda a manera de documentacion, podremos agregar la siguiente linea al final:
+
+```bash
+0 2 * * * /ruta/completa/a/tu/script.sh >> /ruta/completa/a/tu/log.log 2>&1
+```
+
+Lo cual se traduce a lo siguiente:
+
+    Minuto  Hora  DíaMes  Mes  DíaSemana  Comando
+    0       2     *       *    *          /ruta/completa/a/tu/script.sh
+
+Esta instrucion ejecutara el script indicado todos los dias a las 2 de la madrugada
+
+la parte que esta despues del script.sh `>> /ruta/completa/a/tu/log.log 2>&1` nos generara un log cada vez que el script se ejecute colocando la nueva informacion al final del archivo log.log, si el archivo no existe lo creara por nosotros.
