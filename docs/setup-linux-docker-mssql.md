@@ -36,19 +36,27 @@ Verifica que la instalacion sea correcta ejecutando un `hello-world`
 sudo docker run hello-world
 ```
 
-2. Instalar [bun](curl -fsSL <https://bun.sh/install> | bash) para poder ejecutar el script de javascript para subir los backups de la bd a AWS S3
+### Instalación de [AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html)
+
+Para poder ejecutar el script de javascript para subir los backups de la bd a un bucket S3
 
 ```bash
-curl -fsSL https://bun.sh/install | bash
+curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+unzip awscliv2.zip
+sudo ./aws/install
 ```
 
-3. Instalar (si es que aun no las tienenes) las utilerias que necesitaremos mas adelante en esta guia:
+### Instalación utilerias
+
+instala (si es que aun no las tienenes) las utilerias que necesitaremos mas adelante en esta guia
 
 ```bash
 apt install zip xclip -y
 ```
 
-4. (Opcional) Instalar [Neovim](https://github.com/neovim/neovim/blob/master/INSTALL.md#linux) un editor de texto bastante completo dentro de la terminal
+### Instalación (Opcional) [Neovim](https://github.com/neovim/neovim/blob/master/INSTALL.md#linux)
+
+Un editor de texto bastante completo dentro de la terminal
 
 ```bash
 curl -LO https://github.com/neovim/neovim/releases/latest/download/nvim-linux-x86_64.tar.gz
@@ -59,7 +67,7 @@ sudo tar -C /opt -xzf nvim-linux-x86_64.tar.gz
 export PATH="$PATH:/opt/nvim-linux-x86_64/bin"
 ```
 
-## Configuración
+## Configuración docker-compose
 
 Necesitamos crear un archivo docker compose para levantar un contenedor
 de mssql oficial de Microsoft, y a su vez mapear una ruta dentro del
@@ -69,7 +77,7 @@ contenedor una ruta dentro de nuestro VPS de linux
     - La ruta donde se generan los backups dentro del contenedor es `/var/opt/mssql/data/`
     - El puerto por defecto usado por mssql es 1433
 
-comando ejemplo para levantar una imagen de mssql usando la version mas reciente:
+`NO EJECUTAR`, es solo ilustrativo -> comando ejemplo para levantar una imagen de mssql usando la version mas reciente:
 
 ```bash
 docker run -e "ACCEPT_EULA=Y" -e "MSSQL_SA_PASSWORD=SUPER_PASSWORD" -e "MSSQL_PID=Express" -p 1433:1433  --name NOMBRE_DEL_CONTENEDOR -d mcr.microsoft.com/mssql/server:latest
@@ -78,19 +86,19 @@ docker run -e "ACCEPT_EULA=Y" -e "MSSQL_SA_PASSWORD=SUPER_PASSWORD" -e "MSSQL_PI
     NOTAS
     El password debe de tener una mayúscula, minuscula, numero y un simbolo, y ser de 8 caracteres
 
-Ejemplo de docker compose para levantar la BD:
+Pasamos el comando anterior a un docker-compose.yml, nos quedaria algo asi:
 
 ```yaml
 version: '3'
 
 services:
   mssql:
-    image: mcr.microsoft.com/mssql/server:2022-latest
+    image: mcr.microsoft.com/mssql/server:latest
     user: root
-    container_name: My_custom_container
+    container_name: NOMBRE_DEL_CONTENEDOR
     environment:
       - ACCEPT_EULA=Y
-      - MSSQL_SA_PASSWORD=PASSWORD
+      - MSSQL_SA_PASSWORD=SUPER_PASSWORD
       - MSSQL_PID=Express
     ports:
       - "1433:1433"
@@ -102,6 +110,8 @@ services:
 
 El nombre del contenedor deberia de incluir el nombre del stage al cual pertenecera, algo como por ejemplo: `aplicacion_production`, `aplicacion_development` ó `aplicacion_staging`
 
+Se agrego el campo user para que tenga permisos de poder ejecutar comandos, caso contrario arrojara un error y tendremos que eliminar el contenedor generado porque no nos servira.
+
 ## Backup DB bash script
 
 Ahora necesitamos crear un archivo en nuestra ruta $HOME (preferentemente) con cualquier nombre, en este caso lo llamare `backup_db.sh` y le agregamos el siguiente contenido:
@@ -111,8 +121,9 @@ Ahora necesitamos crear un archivo en nuestra ruta $HOME (preferentemente) con c
 FECHA=$(date +%Y%m%d_%H%M%S)
 docker exec -it yoox_test /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P 'PASSWORD' -C -Q "BACKUP DATABASE NOMBRE_BD TO DISK = '/var/opt/mssql/data/respaldo_$FECHA.bak' WITH FORMAT"
 echo "Respaldo guardado en /db_backups/respaldo_$FECHA.bak"
-zip db_backups/respaldo_$FECHA.zip db_backups/respaldo_$FECHA.bak
-rm db_backups/respaldo_$FECHA.bak
+zip ~/db_backups/respaldo_$FECHA.zip ~/db_backups/respaldo_$FECHA.bak
+aws s3 mv ~/db_backups/respaldo_$FECHA.zip s3://respaldos-db-yoox
+echo "Respaldo guardado en AWS S3!"
 ```
 
 Cambiar solo en la sección del comando de docker el valor de `-P` por el password de tu db y el valor de `-Q` para que tenga el nombre de tu base de datos.
@@ -128,7 +139,7 @@ sudo systemctl enable cron
 sudo systemctl start cron
 ```
 
-### Abbrir crontab
+### Abrir crontab
 
 Aquí es donde agregamos nuestros comandos que queremos ejecutar cada cierto tiempo, y lo ejecutamos con el comando:
 
@@ -141,7 +152,7 @@ Al abrirlo por primera vez nos preguntara por algun editor de texto, elegir el q
 Veras un texto explicando el crontab, solo necesitamos agregar una linea al final del todo, dejemos todo el texto sin modificaciones, nos ayuda a manera de documentacion, podremos agregar la siguiente linea al final:
 
 ```bash
-0 2 * * * /ruta/completa/a/tu/script.sh >> /ruta/completa/a/tu/log.log 2>&1
+0 2 * * * ~/backup_db.sh >> ~/backup_db.log 2>&1
 ```
 
 Lo cual se traduce a lo siguiente:
@@ -151,4 +162,14 @@ Lo cual se traduce a lo siguiente:
 
 Esta instrucion ejecutara el script indicado todos los dias a las 2 de la madrugada
 
-la parte que esta despues del script.sh `>> /ruta/completa/a/tu/log.log 2>&1` nos generara un log cada vez que el script se ejecute colocando la nueva informacion al final del archivo log.log, si el archivo no existe lo creara por nosotros.
+la parte que esta despues del script.sh `>> ~/backup_db.log 2>&1` nos generara un log cada vez que el script se ejecute colocando la nueva informacion al final del archivo backup.log, si el archivo no existe lo creara por nosotros, guarda tanto los logs que se mandan al stdinput como al stderror.
+
+### Verificar nuestro cron job
+
+Fácil, ejecutamos la siguiente linea:
+
+```bash
+crontab -l
+```
+
+esto deberia de mostrarnos la linea que agregamos
