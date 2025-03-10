@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      <link rel="shortcut icon" href="../img/favicon.ico" />
+    <title>Instalacion mssql con Docker linux - Documentación YOOX</title>
+    <link rel="stylesheet" href="../css/theme.css" />
+    <link rel="stylesheet" href="../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "Instalacion mssql con Docker linux";
+        var mkdocs_page_input_path = "setup-linux-docker-mssql.md";
+        var mkdocs_page_url = null;
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href=".." class="icon icon-home"> Documentación YOOX
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="..">Bienvenido al Manual de Usuario - Sistema de Gestión de Préstamos</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../captura-solicitud/">Captura de Solicitudes de Préstamo</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../consulta-solicitud/">Consulta de Status de Solicitud</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../registro-pago/">Registro de Pagos</a>
+                </li>
+              </ul>
+              <ul class="current">
+                <li class="toctree-l1 current"><a class="reference internal current" href="#">Instalacion mssql con Docker linux</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#prerequisitos">Prerequisitos</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#instalacion-de-aws-cli">Instalación de AWS CLI</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#instalacion-utilerias">Instalación utilerias</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#instalacion-opcional-neovim">Instalación (Opcional) Neovim</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#configuracion-docker-compose">Configuración docker-compose</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#backup-db-bash-script">Backup DB bash script</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#crontab-para-ejecutar-periodicamente-script">Crontab para ejecutar periodicamente script</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#abrir-crontab">Abrir crontab</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#verificar-nuestro-cron-job">Verificar nuestro cron job</a>
+    </li>
+        </ul>
+    </li>
+    </ul>
+                </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="..">Documentación YOOX</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href=".." class="icon icon-home" aria-label="Docs"></a></li>
+      <li class="breadcrumb-item active">Instalacion mssql con Docker linux</li>
+    <li class="wy-breadcrumbs-aside">
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="instalacion-mssql-con-docker-linux">Instalacion mssql con Docker linux</h1>
+<p>Esta guia muestra como configurar la imagen oficial de <a href="https://hub.docker.com/r/microsoft/mssql-server/">mssql</a>  de microsoft usando Docker en un SO Ubuntu Linux</p>
+<h2 id="prerequisitos">Prerequisitos</h2>
+<ol>
+<li>Instalar docker <a href="https://docs.docker.com/engine/install/ubuntu/#install-using-the-repository">Docker</a> en la VPS</li>
+</ol>
+<p>Set up del repositorio de Docker.</p>
+<pre><code class="language-bash"># Add Docker's official GPG key:
+sudo apt-get update
+sudo apt-get install ca-certificates curl
+sudo install -m 0755 -d /etc/apt/keyrings
+sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
+sudo chmod a+r /etc/apt/keyrings/docker.asc
+
+# Add the repository to Apt sources:
+echo \
+  &quot;deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu \
+  $(. /etc/os-release &amp;&amp; echo &quot;${UBUNTU_CODENAME:-$VERSION_CODENAME}&quot;) stable&quot; | \
+  sudo tee /etc/apt/sources.list.d/docker.list &gt; /dev/null
+sudo apt-get update
+</code></pre>
+<p>Para instalar la última version usa el siguiente comando:</p>
+<pre><code class="language-bash">sudo apt-get install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin docker-compose
+</code></pre>
+<p>Verifica que la instalacion sea correcta ejecutando un <code>hello-world</code></p>
+<pre><code class="language-bash">sudo docker run hello-world
+</code></pre>
+<h3 id="instalacion-de-aws-cli">Instalación de <a href="https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html">AWS CLI</a></h3>
+<p>Para poder ejecutar el script de javascript para subir los backups de la bd a un bucket S3</p>
+<pre><code class="language-bash">curl &quot;https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip&quot; -o &quot;awscliv2.zip&quot;
+unzip awscliv2.zip
+sudo ./aws/install
+</code></pre>
+<h3 id="instalacion-utilerias">Instalación utilerias</h3>
+<p>instala (si es que aun no las tienenes) las utilerias que necesitaremos mas adelante en esta guia</p>
+<pre><code class="language-bash">apt install zip xclip -y
+</code></pre>
+<h3 id="instalacion-opcional-neovim">Instalación (Opcional) <a href="https://github.com/neovim/neovim/blob/master/INSTALL.md#linux">Neovim</a></h3>
+<p>Un editor de texto bastante completo dentro de la terminal</p>
+<pre><code class="language-bash">curl -LO https://github.com/neovim/neovim/releases/latest/download/nvim-linux-x86_64.tar.gz
+sudo rm -rf /opt/nvim
+sudo tar -C /opt -xzf nvim-linux-x86_64.tar.gz
+
+# Then add this to your shell config (~/.bashrc, ~/.zshrc, ...):
+export PATH=&quot;$PATH:/opt/nvim-linux-x86_64/bin&quot;
+</code></pre>
+<h2 id="configuracion-docker-compose">Configuración docker-compose</h2>
+<p>Necesitamos crear un archivo docker compose para levantar un contenedor
+de mssql oficial de Microsoft, y a su vez mapear una ruta dentro del
+contenedor una ruta dentro de nuestro VPS de linux</p>
+<pre><code>NOTAS
+- La ruta donde se generan los backups dentro del contenedor es `/var/opt/mssql/data/`
+- El puerto por defecto usado por mssql es 1433
+</code></pre>
+<p><code>NO EJECUTAR</code>, es solo ilustrativo -&gt; comando ejemplo para levantar una imagen de mssql usando la version mas reciente:</p>
+<pre><code class="language-bash">docker run -e &quot;ACCEPT_EULA=Y&quot; -e &quot;MSSQL_SA_PASSWORD=SUPER_PASSWORD&quot; -e &quot;MSSQL_PID=Express&quot; -p 1433:1433  --name NOMBRE_DEL_CONTENEDOR -d mcr.microsoft.com/mssql/server:latest
+</code></pre>
+<pre><code>NOTAS
+El password debe de tener una mayúscula, minuscula, numero y un simbolo, y ser de 8 caracteres
+</code></pre>
+<p>Pasamos el comando anterior a un docker-compose.yml, nos quedaria algo asi:</p>
+<pre><code class="language-yaml">version: '3'
+
+services:
+  mssql:
+    image: mcr.microsoft.com/mssql/server:latest
+    user: root
+    container_name: NOMBRE_DEL_CONTENEDOR
+    environment:
+      - ACCEPT_EULA=Y
+      - MSSQL_SA_PASSWORD=SUPER_PASSWORD
+      - MSSQL_PID=Express
+    ports:
+      - &quot;1433:1433&quot;
+    volumes:
+      - ~/db_backups:/var/opt/mssql/data
+    restart: unless-stopped
+
+</code></pre>
+<p>El nombre del contenedor deberia de incluir el nombre del stage al cual pertenecera, algo como por ejemplo: <code>aplicacion_production</code>, <code>aplicacion_development</code> ó <code>aplicacion_staging</code></p>
+<p>Se agrego el campo user para que tenga permisos de poder ejecutar comandos, caso contrario arrojara un error y tendremos que eliminar el contenedor generado porque no nos servira.</p>
+<h2 id="backup-db-bash-script">Backup DB bash script</h2>
+<p>Ahora necesitamos crear un archivo en nuestra ruta $HOME (preferentemente) con cualquier nombre, en este caso lo llamare <code>backup_db.sh</code> y le agregamos el siguiente contenido:</p>
+<pre><code class="language-bash">#!/bin/bash
+FECHA=$(date +%Y%m%d_%H%M%S)
+docker exec -it yoox_test /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P 'PASSWORD' -C -Q &quot;BACKUP DATABASE NOMBRE_BD TO DISK = '/var/opt/mssql/data/respaldo_$FECHA.bak' WITH FORMAT&quot;
+echo &quot;Respaldo guardado en /db_backups/respaldo_$FECHA.bak&quot;
+zip ~/db_backups/respaldo_$FECHA.zip ~/db_backups/respaldo_$FECHA.bak
+aws s3 mv ~/db_backups/respaldo_$FECHA.zip s3://respaldos-db-yoox
+echo &quot;Respaldo guardado en AWS S3!&quot;
+</code></pre>
+<p>Cambiar solo en la sección del comando de docker el valor de <code>-P</code> por el password de tu db y el valor de <code>-Q</code> para que tenga el nombre de tu base de datos.</p>
+<p>El script anterior guarda el archivo .bak en la ruta <code>/var/opt/mssql/data/</code> la cual teniamos previamente mapeada como <code>volumen</code> a la ruta de nuestro host llamado <code>~/db_backups</code>, comprimira el archivo .bak en un archivo standard .zip para posteriormente eliminar el archivo .bak y asi ahorrar espacio en la VPS</p>
+<h2 id="crontab-para-ejecutar-periodicamente-script">Crontab para ejecutar periodicamente script</h2>
+<p>Antes que nada es buena idea validar que el crontab este habilitado en nuestro ubuntu linux con el siguiente comando:</p>
+<pre><code class="language-bash">sudo systemctl enable cron
+sudo systemctl start cron
+</code></pre>
+<h3 id="abrir-crontab">Abrir crontab</h3>
+<p>Aquí es donde agregamos nuestros comandos que queremos ejecutar cada cierto tiempo, y lo ejecutamos con el comando:</p>
+<pre><code class="language-bash">crontab -e
+</code></pre>
+<p>Al abrirlo por primera vez nos preguntara por algun editor de texto, elegir el que mas sepas usar, si no sabes cual elegir te recomiendo usar <code>nano</code></p>
+<p>Veras un texto explicando el crontab, solo necesitamos agregar una linea al final del todo, dejemos todo el texto sin modificaciones, nos ayuda a manera de documentacion, podremos agregar la siguiente linea al final:</p>
+<pre><code class="language-bash">0 2 * * * ~/backup_db.sh &gt;&gt; ~/backup_db.log 2&gt;&amp;1
+</code></pre>
+<p>Lo cual se traduce a lo siguiente:</p>
+<pre><code>Minuto  Hora  DíaMes  Mes  DíaSemana  Comando
+0       2     *       *    *          /ruta/completa/a/tu/script.sh
+</code></pre>
+<p>Esta instrucion ejecutara el script indicado todos los dias a las 2 de la madrugada</p>
+<p>la parte que esta despues del script.sh <code>&gt;&gt; ~/backup_db.log 2&gt;&amp;1</code> nos generara un log cada vez que el script se ejecute colocando la nueva informacion al final del archivo backup.log, si el archivo no existe lo creara por nosotros, guarda tanto los logs que se mandan al stdinput como al stderror.</p>
+<h3 id="verificar-nuestro-cron-job">Verificar nuestro cron job</h3>
+<p>Fácil, ejecutamos la siguiente linea:</p>
+<pre><code class="language-bash">crontab -l
+</code></pre>
+<p>esto deberia de mostrarnos la linea que agregamos</p>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href="../registro-pago/" class="btn btn-neutral float-left" title="Registro de Pagos"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+    
+      <span><a href="../registro-pago/" style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+  </span>
+</div>
+    <script src="../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "..";</script>
+    <script src="../js/theme_extra.js"></script>
+    <script src="../js/theme.js"></script>
+      <script src="../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>
