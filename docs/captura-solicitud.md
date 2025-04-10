@@ -1,6 +1,4 @@
-# Captura de Solicitudes de Préstamo
-
-![Captura de solicitudes](img/2.avif)
+# Guía rápida - Solicitudes de Préstamo
 
 ## Introducción
 
@@ -13,8 +11,6 @@ Para acceder al módulo de captura de solicitudes:
 1. Inicie sesión en la plataforma con sus credenciales
 2. En el menú principal, haga clic en la opción "Solicitudes"
 3. Seleccione "Nueva Solicitud" en el submenú desplegable
-
-![Acceso al módulo de solicitudes](img/6.avif)
 
 ## Formulario de captura
 

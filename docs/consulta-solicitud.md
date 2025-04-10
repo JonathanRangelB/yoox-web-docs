@@ -1,6 +1,4 @@
-# Consulta de Status de Solicitud
-
-![Consulta de status](img/1.avif)
+# Guía rápida - Consulta de estatus de solicitud
 
 ## Introducción
 
@@ -10,59 +8,74 @@ El módulo de consulta de status permite tanto a clientes como a empleados verif
 
 El sistema permite dos tipos de consultas dependiendo del usuario:
 
-1. **Consulta por clientes**: Acceso limitado a la información básica de sus propias solicitudes.
-2. **Consulta por empleados**: Acceso completo a toda la información y estados de las solicitudes.
+1. **Consulta para empleados (usuarios de sistema)**: Acceso completo a toda la información y estados de las solicitudes.
+2. **Consulta para clientes (usuarios externos)**: Acceso limitado a la información básica de sus propias solicitudes.
 
-## Consulta para clientes
+<div style="background-color: #f8f9fa; padding: 15px; border-radius: 5px; border-left: 5px solid #007bff;">
+<h3>Recomendación</h3>
+<ol>
+<li>Los agentes también pueden consultar siempre el estatus de la solicitud por medio de la consulta para usuarios externos</li>
+</ol>
+</div>
 
-![Portal de clientes](img/2.avif)
+---
 
-### Acceso al portal de clientes
+# Información de solicitud de préstamo
 
-Los clientes pueden consultar el status de su solicitud a través del portal web siguiendo estos pasos:
-
-1. Ingresar a la página principal de la financiera
-2. Hacer clic en el botón "Consulta tu solicitud"
-3. Ingresar el número de folio y CURP en los campos correspondientes
-4. Hacer clic en "Consultar"
-
-### Información visible para clientes
-
-Una vez autenticados, los clientes podrán visualizar:
+Una vez localizada la información, los clientes podrán visualizar:
 
 | Información | Descripción |
 |-------------|-------------|
-| Folio | Número único de identificación de la solicitud |
-| Fecha de solicitud | Día en que se registró la solicitud |
-| Status actual | Estado en que se encuentra la solicitud |
-| Monto solicitado | Cantidad solicitada en préstamo |
-| Plazo | Número de semanas para pago |
-| Monto de pago semanal | Cantidad a pagar semanalmente (si está aprobado) |
-| Próximos pasos | Acciones que debe realizar el cliente |
-| Mensajes | Notificaciones importantes sobre su solicitud |
+| Número de solicitud | Número único de identificación de la solicitud |
+| Agente asignado | Agente qué realizó la negociación de la solicitud |
+| Cliente | Nombre de la persona que solicita el préstamo |
+| Aval | Nombre de la persona que respaldará al cliente |
+| Cantidad solicitada | Cantidad en moneda nacional solicitada por el cliente |
+| Fecha inicial | Fecha en que se hará efectivo el préstamo |
 
-### Estados visibles para clientes
+---
 
-Los posibles estados que puede ver un cliente son:
+# Estatus de la solicitud
 
-- **En revisión**: La solicitud está siendo analizada
-- **Documentación incompleta**: Se requieren documentos adicionales
-- **Aprobada**: La solicitud ha sido aceptada
-- **En proceso de desembolso**: El préstamo está por ser entregado
-- **Rechazada**: La solicitud no fue aprobada
-- **Activa**: El préstamo ya fue desembolsado y está en curso
-- **Liquidada**: El préstamo ha sido pagado completamente
+Los estatus de una solicitud son:
 
-### Notificaciones por SMS y correo electrónico
+- **EN REVISIÓN**: La solicitud está en proceso de validación
+- **ACTUALIZAR**: Se requieren documentos o datos adicionales
+- **APROBADA**: La solicitud ha sido aceptada
+- **RECHAZADA**: La solicitud no fue aprobada
 
-El sistema envía automáticamente notificaciones a los clientes cuando:
+---
 
-- La solicitud cambia de estado
-- Se requiere documentación adicional
-- La solicitud es aprobada o rechazada
-- Se realiza el desembolso del préstamo
+# Consulta para clientes (usuarios externos)
 
-## Consulta para empleados
+Los clientes pueden consultar el status de su solicitud a través del portal web siguiendo estos pasos:
+
+Ingresar a la página principal de YooX Financiera:
+---
+Hacer clic en el botón "Consulta tu solicitud"
+![Información personal](img/gr_loan_query_request/gr_loan_query_request_01.jpg)
+---
+Ingresar el número de solicitud y el apellido paterno en los campos correspondientes:
+![Información personal](img/gr_loan_query_request/gr_loan_query_request_02.jpg)
+---
+Dar clic en "Buscar":
+![Información personal](img/gr_loan_query_request/gr_loan_query_request_03.jpg)
+---
+Si la información proporcionada es correcta, se mostrará la información del estatus actual de la solicitud:
+![Información personal](img/gr_loan_query_request/gr_loan_query_request_04.jpg)
+---
+Si alguno de los datos es incorrecto, se mostrará un mensaje de error:
+![Información personal](img/gr_loan_query_request/gr_loan_query_request_05.jpg)
+
+<div style="background-color: #f8f9fa; padding: 15px; border-radius: 5px; border-left: 5px solid #007bff;">
+<h3>Recomendación</h3>
+<ol>
+<li>En caso de error, verifique que la información proporcionada es correcta</li>
+<li>Si el error persiste, consulte con el administrador del sistema</li>
+</ol>
+</div>
+---
+# Consulta para empleados (usuarios de sistema)
 
 ![Panel de empleados](/img/3.avif)
 

@@ -1,4 +1,4 @@
-# Registro de Pagos
+# Guía rápida - Registro de Pagos
 
 ![Sistema de registro de pagos](img/4.avif)
 
